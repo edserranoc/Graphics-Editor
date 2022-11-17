@@ -1,7 +1,14 @@
-
-
 **To do list:**
 
 - Selection:
-    - Agrupar por área.
+    - Seleccionar por área.
     - Agrupar por grupos.
+- API:
+    - Configuración:
+        - Save.
+        - Load.
+
+- Menu-Helper:
+    - Eliminar etiquetas (chulos).
+    - Delete.
+    

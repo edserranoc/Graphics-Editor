@@ -1,5 +1,6 @@
 import { ControlPoint } from '../model/control-point';
 import { Figure } from '../model/figure';
+import { Dimension, Position } from '../model/bound-box';
 import { Tool } from './tool';
 
 import app from '../index';
@@ -15,10 +16,13 @@ export class SelectionTool extends Tool {
     private fSelected: Figure;
     private fCtrlPoint: ControlPoint;
 
-    // NEW
     // override
     onMouseDown(
         ev: MouseEvent ): void {
+
+        if ( ev.y <= app.getMenuHeight() ) {
+            return;
+        }
 
         if ( this.fSelected || this.fCtrlPoint ) {
             // NOOP
@@ -93,60 +97,95 @@ export class SelectionTool extends Tool {
     }
 
     protected processMouseUp(): void {
-        
-        if ( this.fSelected || this.fCtrlPoint ) {
-            // moving or resizing
+
+        if ( this.fCtrlPoint ) {
+            // resizing (set undo)
+            app.endFigureResize(
+                this.fSelected,
+                this.fCtrlPoint,
+                this.orgFigureSize
+            );
         }
         else {
-            if ( this.equal( this.evDown, this.evUp ) ) {
-                // point selection
-                app.select(
-                    this.evUp
+            if ( this.fSelected ) {
+                // moving (set undo)
+                app.endFigureMove(
+                    this.fSelected,
+                    this.orgFigurePos
                 );
             }
             else {
-                // bound box selection
-                app.select(
-                    this.evDown,
-                    this.evUp
-                );
+                if ( this.equal( this.evDown, this.evUp ) ) {
+                    // point selection
+                    app.select(
+                        this.evUp
+                    );
+                }
+                else {
+                    // bound box selection
+                    app.select(
+                        this.evDown,
+                        this.evUp
+                    );
+                }
             }
         }
 
         this.cleanUp();
     }
 
-    protected cleanUp() {
-        this.fSelected = null;
-        this.fCtrlPoint = null;
-    }
+    private orgFigurePos: Position;
+    private orgFigureSize: Dimension;
 
     protected moveSelected(
         ev: MouseEvent ): void {
-            
-        this.fSelected
-            .move(
-                ev.offsetX - this.evDown.offsetX,
-                ev.offsetY - this.evDown.offsetY
-            );
 
+        if ( this.orgFigurePos ) {
+            // OK
+        }
+        else {
+            this.orgFigurePos = {
+                x: this.fSelected.x,
+                y: this.fSelected.y
+            };
+        }
+
+        app.moveFigure(
+            this.fSelected,
+            ev.offsetX - this.evDown.offsetX,
+            ev.offsetY - this.evDown.offsetY
+        );
+                
         this.evDown = ev;
-
-        app.repaint();
     } 
 
     protected moveControlPoint(
         ev: MouseEvent ): void {
-        
-        this.fCtrlPoint
-            .move(
-                ev.offsetX - this.evDown.offsetX,
-                ev.offsetY - this.evDown.offsetY,
-                this.fSelected
-            );
 
+        if ( this.orgFigureSize ) {
+            // OK
+        }
+        else {
+            this.orgFigureSize = {
+                w: this.fSelected.w,
+                h: this.fSelected.h
+            };
+        }
+
+        app.resizeFigure(
+            this.fSelected,
+            this.fCtrlPoint,
+            ev.offsetX - this.evDown.offsetX,
+            ev.offsetY - this.evDown.offsetY
+        );
+                
         this.evDown = ev;
+    }
 
-        app.repaint();
+    protected cleanUp() {
+        this.fSelected = null;
+        this.fCtrlPoint = null;
+        this.orgFigurePos = null;
+        this.orgFigureSize = null;
     }
 }

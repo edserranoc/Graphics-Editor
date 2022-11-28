@@ -7,9 +7,9 @@ export interface Factory {
     create( obj: any ): Figure;
 }
 
-export abstract class Figure implements GraphicsObject {
+export abstract class Figure 
+    implements GraphicsObject {
 
-    // NEW
     abstract get name(): string;
 
     protected abstract doPaint( 
@@ -26,33 +26,30 @@ export abstract class Figure implements GraphicsObject {
         }
     }
 
+    // NEW --------------------------------------------
+    setColor(
+        color: Color ): void {
+
+        this.color = color;
+
+        this.children
+            .forEach( 
+                (f: Figure) => f.setColor( color ) 
+            );
+    }
+    getColor(): Color {
+        return this.color;
+    }
+    // NEW --------------------------------------------
+
     get selected(): boolean {
         return this._selected;
     }
 
-    set selected( s: boolean ) {
-        this._selected = s;
+    set selected( b: boolean ) {
+        this._selected = b;
     }
 
-
-    addChild(
-        f: Figure): void
-        {
-            this.figures
-                .push(f)
-        }
-
-    remChild(
-        f: Figure): void {
-            const idx: number  = this.figures
-                .indexOf( f );
-            
-            if (idx >= 0 ){
-                this.figures = this.figures
-                .slice( idx , 1)
-            }
-        }
-    
     // Template Method
     paint( 
         ctx: CanvasRenderingContext2D ): void {
@@ -62,25 +59,20 @@ export abstract class Figure implements GraphicsObject {
             ctx
         );
 
-        /*this.children.forEach()*/
+        // 2. paint children
+        this.children
+            .forEach( 
+                (f: Figure) => f.paint( ctx ) 
+            );
 
-        // 2. paint bounding box
+        // 3. paint bounding box
         if ( this.selected ) {
-            if (this.children.length > 0 ) {
-
-            }
-            else {
-                this.bbox
+            this.bbox
                 .paint(
                     ctx
                 );
-            }
-            // this.bbox
-            //     .paint(
-            //         ctx
-            //     );
 
-            // 3. draw control points
+            // 4. draw control points
             Figure.ctrlPoints
                 .forEach( 
                     (cp: ControlPoint) => cp.paint( ctx, this ) 
@@ -124,11 +116,17 @@ export abstract class Figure implements GraphicsObject {
     move(
         dx: number, 
         dy: number) {
-        
+
         this.bbox
             .move(
                 dx, 
                 dy
+            );
+
+        // NEW
+        this.children
+            .forEach( 
+                (f: Figure) => f.move( dx, dy )     // !!!
             );
     }
 
@@ -141,6 +139,16 @@ export abstract class Figure implements GraphicsObject {
                 dx,
                 dy
             );
+
+        this.children
+            .forEach( 
+                (f: Figure) => f.resize( dx, dy ) 
+            );
+    }
+
+    // NEW
+    hasChildren(): boolean {
+        return (this.children.length > 0);
     }
 
     get x(): number {
@@ -156,20 +164,105 @@ export abstract class Figure implements GraphicsObject {
         return this.bbox.h;
     }
 
-    // NEW
-    toJSON(): any {
-        return {
+    toJSON(): string {
+        return JSON.stringify({
             bbox: this.bbox,
-            color: this.color
-        };
+            color: this.color,
+        });
+    }
+    
+    addChild( 
+        f: Figure ): void {
+
+        f.selected = false;
+
+        if ( f ) this.children
+            .push( 
+                f
+            );
+
+        this.recomputeBoundBox();
+    }
+
+    /*remChild( 
+        f: Figure ): void {
+
+        f.selected = false;
+
+        // const idx: number = this.children
+        //     .indexOf( f );
+
+        // if ( idx >= 0 ) {
+        //     this.children = this.children
+        //         .splice( idx, 1 );
+        // }
+
+        if ( f ) this.children = this.children.splice( f , 1 );
+
+        this.recomputeBoundBox();
+    }*/
+
+    flushChildren(): Figure[] {
+
+        const fa = this.children;
+
+        // reset children
+        this.children = [];
+
+        // reset group bbox
+        this.bbox
+            .moveTo( 
+                0, 0 
+            );
+        this.bbox
+            .scale( 
+                0, 0 
+            );
+    
+        return fa;
     }
 
     // non-public members -----------------------------
 
+    protected children: Figure[] = [];
+
+    private recomputeBoundBox(): void {
+        this.bbox
+            .reset();
+            
+        // start with first child position & size 
+        let left:   number = this.children[ 0 ].x;
+        let top:    number = this.children[ 0 ].y;
+        let right:  number = this.children[ 0 ].x + this.children[ 0 ].w;
+        let bottom: number = this.children[ 0 ].y + this.children[ 0 ].h;
+
+        this.children
+            .forEach( (f: Figure) => {
+                if ( f.x < left ) left = f.x;
+                if ( f.y < top  ) top  = f.y;
+
+                const fRight: number = f.x + f.w;
+                if ( fRight > right ) right = fRight;
+
+                const fBottom: number = f.y + f.h;
+                if ( fBottom > bottom ) bottom = fBottom;
+            });
+
+        this.bbox
+            .moveTo(
+                left, top
+            );
+
+        this.bbox
+            .resize(
+                right - left, 
+                bottom - top
+            );
+    }
+
     protected _selected: boolean = false;
     
-    static readonly ctrlPoints: ControlPoint[] = [
-    ];
+    static readonly ctrlPoints: ControlPoint[] = [];
 
     private addControlPoints(): void {
 

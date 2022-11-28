@@ -3,7 +3,8 @@ import { Tool } from './tool';
 
 import app from '../index';
 
-export abstract class CreationTool extends Tool {
+export abstract class CreationTool
+    extends Tool {
 
     protected abstract createFigure(): Figure;
     

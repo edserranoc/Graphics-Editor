@@ -1,5 +1,7 @@
+import { ApiService } from '../api/api-service';
 import { BoundBox } from './bound-box';
 import { Color, ColorHelper } from '../util/color-helper';
+import { Factory } from './figure';
 import { Figure } from './figure';
 
 export class Text extends Figure {
@@ -11,7 +13,7 @@ export class Text extends Figure {
         color: Color,
         protected userText: string,
         protected userSizeText: string,
-        protected userTextSerif?: string) {
+        protected userTextSerif: string) {
 
         super(
             bbox,
@@ -23,7 +25,7 @@ export class Text extends Figure {
         return Text.className;
     }
         
-    protected doPaint( ctx: CanvasRenderingContext2D ): void {
+    doPaint( ctx: CanvasRenderingContext2D ): void {
 
         ctx.strokeStyle = ColorHelper.colorAsString(
             this.color
@@ -39,3 +41,30 @@ export class Text extends Figure {
 
     }
 }
+
+class TextFactory implements Factory {
+
+    create(json: any): Text {
+        return new Text(
+            new BoundBox(
+                {
+                    x: json.bbox.position.x,
+                    y: json.bbox.position.y
+                },
+                {
+                    w: json.bbox.size.w,
+                    h: json.bbox.size.h
+                }),
+            json.color,
+            json.userText,
+            json.lineStyle,
+            json.lineStyle,
+        );
+    }
+}
+
+ApiService.getInstance()
+    .registerFactory(
+        Text.className,
+        new TextFactory()
+    );

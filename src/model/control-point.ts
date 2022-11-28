@@ -13,7 +13,8 @@ export enum Cardinal {
     NORTH_WEST
 }
 
-export class ControlPoint implements GraphicsObject {
+export class ControlPoint 
+    implements GraphicsObject {
     
     static readonly HSIZE: number = 4;
 
@@ -85,38 +86,61 @@ export class ControlPoint implements GraphicsObject {
         // TODO: complete switch
 
         switch ( this.cardinal ) {
-            case Cardinal.SOUTH:
             case Cardinal.NORTH:
+                owner.move(
+                    0, dy
+                );
+                owner.resize( 
+                    0, -dy
+                );
+                break;
+            case Cardinal.SOUTH:
                 owner.resize( 
                     0, dy 
                 );
                 break;
+            case Cardinal.SOUTH_EAST:
+                owner.move(
+                    dx, 0
+                );
+                owner.resize( 
+                    -dx, dy
+                );
+                break;
             case Cardinal.EAST:
-            case Cardinal.WEST:
                 owner.resize( 
                     dx, 0
                 );
                 break;
+            case Cardinal.WEST:
+                owner.move(
+                    dx, 0
+                );
+                owner.resize( 
+                    -dx, 0
+                );
+                break;
             case Cardinal.NORTH_WEST:
+                owner.move(
+                    dx, dy
+                );
+                owner.resize( 
+                    -dx, -dy
+                );
+                break;
             case Cardinal.NORTH_EAST:
-            case Cardinal.SOUTH_EAST:
+                owner.move(
+                    0, dy
+                );
+                owner.resize( 
+                    dx, -dy
+                );
+                break;
             case Cardinal.SOUTH_WEST:
                 owner.resize( 
                     dx, dy
                 );
                 break;
-            /*
-            case Cardinal.NORTH:
-                owner.resize( 
-                    0, dy
-                );
-                break;
-            case Cardinal.WEST:
-                owner.resize( 
-                    dx, 0
-                );
-                break;
-            */
         }
     }
 

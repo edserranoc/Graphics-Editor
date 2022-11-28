@@ -28,13 +28,13 @@ export class Ellipse extends ClosedFigure {
         );
     }
 
-    protected doPaint(ctx: CanvasRenderingContext2D): void {
+    doPaint(ctx: CanvasRenderingContext2D): void {
 
         ctx.strokeStyle = ColorHelper.colorAsString(
             this.color
         );
 
-        ctx.lineWidth=this.lineThickness;
+        // ctx.lineWidth=this.lineThickness;
         // ctx.setLineDash(this.lineStyle);
 
         ctx.beginPath();

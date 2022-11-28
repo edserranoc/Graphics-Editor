@@ -18,4 +18,10 @@ export class ClosedFigure extends GeomFigure {
             lineStyle
         );
     }
+
+    doPaint(
+        ctx: CanvasRenderingContext2D ): void {
+        ctx.lineWidth = this.lineThickness;
+        ctx.setLineDash(this.lineStyle);
+    }
 }

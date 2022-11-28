@@ -41,7 +41,7 @@ export class LineCreationTool extends CreationTool {
             ),
             { 
                 r: 0, g: 0, b: 0, a: 255   // color ?
-            },5,[5,15]
+            },0,[5,15]
         );
     }    
 }

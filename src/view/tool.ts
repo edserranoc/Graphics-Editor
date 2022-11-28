@@ -18,6 +18,10 @@ export abstract class Tool {
     onMouseDown(
         ev: MouseEvent ): void {
 
+        if ( ev.y <= app.getMenuHeight() ) {
+            return;
+        }
+
         this.evDown = ev;
 
         this.startFeedback(
@@ -29,10 +33,8 @@ export abstract class Tool {
     onMouseUp(
         ev: MouseEvent ): void {
 
+        // 0. check event is inside canvas
         if ( !this.evDown ) {
-            console.warn(
-                'Tool::onMouseUp() => OUT OF SEQUENCE'
-            );
             return;
         }
 

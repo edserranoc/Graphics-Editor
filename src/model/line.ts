@@ -1,9 +1,8 @@
-import { ApiService } from '../api/api-service';
-import { BoundBox } from './bound-box';
-import { Color, ColorHelper } from '../util/color-helper';
-import { Factory } from './figure';
+import { ApiService,} from '../api/api-service';
+import { BoundBox, } from './bound-box';
+import { Color, ColorHelper, } from '../util/color-helper';
+import { Factory, } from './figure';
 import { GeomFigure } from './geometric-figure';
-
 
 export class Line extends GeomFigure {
 
@@ -13,7 +12,7 @@ export class Line extends GeomFigure {
         bbox: BoundBox,
         color: Color,
         lineThickness: number,
-        lineStyle: Array<number>) {
+        lineStyle: Array<number> ) {
 
         super(
             bbox,
@@ -22,50 +21,49 @@ export class Line extends GeomFigure {
             lineStyle
         );
     }
-
+        
     get name(): string {
         return Line.className;
     }
 
-    protected doPaint(
-        ctx: CanvasRenderingContext2D): void {
+    doPaint(
+        ctx: CanvasRenderingContext2D ): void {
 
         ctx.strokeStyle = ColorHelper.colorAsString(
             this.color
         );
 
-        ctx.lineWidth=this.lineThickness;
-        //ctx.setLineDash(this.lineStyle);
-
         ctx.beginPath();
         ctx.moveTo(
-            this.bbox.x,
+            this.bbox.x, 
             this.bbox.y
         );
         ctx.lineTo(
-            this.bbox.x + this.bbox.w,
+            this.bbox.x + this.bbox.w, 
             this.bbox.y + this.bbox.h
         );
         ctx.stroke();
     }
 }
 
-class LineFactory implements Factory {
+class LineFactory  implements Factory {
 
-    create(json: any): Line {
+    create( 
+        obj: any ): Line {
+
         return new Line(
             new BoundBox(
-                {
-                    x: json.bbox.position.x,
-                    y: json.bbox.position.y
-                },
-                {
-                    w: json.bbox.size.w,
-                    h: json.bbox.size.h
-                }),
-            json.color,
-            json.lineThickness,
-            json.lineStyle,
+            { 
+                x: obj.bbox.position.x, 
+                y: obj.bbox.position.y
+            },
+            { 
+                w: obj.bbox.size.w, 
+                h: obj.bbox.size.h 
+            }),
+            obj.color,
+            obj.lineThickness,
+            obj.lineStyle,
         );
     }
 }

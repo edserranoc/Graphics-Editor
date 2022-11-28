@@ -23,7 +23,7 @@ export class Hexagon extends ClosedFigure {
         );
     }
 
-    protected doPaint(ctx: CanvasRenderingContext2D): void {
+    doPaint(ctx: CanvasRenderingContext2D): void {
 
         ctx.lineWidth=this.lineThickness;
         // ctx.setLineDash(this.lineStyle);

@@ -2,7 +2,7 @@ import { ControlPoint } from './control-point';
 import { ColorHelper } from '../util/color-helper';
 import { GraphicsObject } from './graphics-object';
 
-export interface  Position {
+export interface Position {
     x: number;
     y: number;
 }
@@ -12,7 +12,8 @@ export interface Dimension {
     h: number;
 }
 
-export class BoundBox implements GraphicsObject {
+export class BoundBox 
+    implements GraphicsObject {
 
     static readonly color: string = ColorHelper.colorAsString({
         r: 28,
@@ -36,7 +37,7 @@ export class BoundBox implements GraphicsObject {
         ctx.beginPath();
         ctx.rect( 
             this.position.x, this.position.y, 
-            Math.abs(this.size.w),     Math.abs(this.size.h) 
+            this.size.w,     this.size.h 
         );
         ctx.stroke();
     }
@@ -111,13 +112,52 @@ export class BoundBox implements GraphicsObject {
         this.size.h += dy;
     }
 
+    scale(
+        rx: number, 
+        ry: number ): void {
+
+        this.size.w *= rx;
+        this.size.h *= ry;
+    }
+
+    reset(): void {
+
+        this.position.x = 0;
+        this.position.y = 0;
+
+        this.size.w = 0;
+        this.size.h = 0;
+    }
+
     // non-public members -----------------------------
     
-    // TODO
+    // NEW
     private contained(
         evDown: MouseEvent,
         evUp: MouseEvent ): boolean {
 
-        return false;
+        const bbox: BoundBox = new BoundBox(
+            { x: evDown.x, y: evDown.y },
+            { w: evUp.x - evDown.x, h: evUp.y - evDown.y }
+        );
+
+        return this.intersects(
+            bbox
+        );
+    }
+
+    private intersects(
+        bbox: BoundBox ): boolean {
+
+        const x_overlap: number = Math.max(
+            0, 
+            Math.min( this.x + this.w, bbox.x + bbox.w ) - Math.max( this.x, bbox.x ) 
+        );
+        const y_overlap: number = Math.max(
+            0, 
+            Math.min( this.y + this.h, bbox.y + bbox.h ) - Math.max( this.y, bbox.y )
+        );
+
+        return (x_overlap * y_overlap > 0);
     }
 }

@@ -22,7 +22,7 @@ export class Rectangle extends ClosedFigure {
         );
     }
         
-    protected doPaint(
+    doPaint(
         ctx: CanvasRenderingContext2D ): void {
 
         ctx.beginPath();

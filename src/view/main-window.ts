@@ -1,8 +1,8 @@
 import { App } from '../controller/app';
-
 import { MenuHelper } from './menu-helper';
 
 export class MainWindow {
+    [x: string]: any;
     
     // NEW -------------------------------------------
     private menu: MenuHelper;
@@ -26,11 +26,11 @@ export class MainWindow {
             .init();
         this.feedback
             .init();
-    }
-
-    repaint(): void {
+            
         this.canvas
             .repaint();
+        
+        // this.App.list();
     }
 
     getContext(): CanvasRenderingContext2D {
@@ -57,7 +57,6 @@ export class MainWindow {
             );
     }
             
-    // NEW
     setActiveTool( 
         t: number ) {
 
@@ -65,6 +64,12 @@ export class MainWindow {
             .setActiveTool(
                 t
             );
+    }
+
+    // NEW
+    getMenuHeight(): number {
+        return this.menu
+            .getHeight();
     }
 }
 
@@ -88,19 +93,12 @@ abstract class Canvas {
         this.htmlElement.height = Canvas.PAGE_HEIGHT;
 
         this.htmlElement.style.position = 'absolute';
-        this.htmlElement.style.left   = '0';
-        this.htmlElement.style.top    = '28px';
         this.htmlElement.style.width  = `${Canvas.PAGE_WIDTH}px`;
         this.htmlElement.style.height = `${Canvas.PAGE_HEIGHT}px`;
 
         const content: HTMLElement = document.getElementById(
             'content'
         );
-        content.style.position = 'fixed'; 
-        content.style.left = '0'; 
-        content.style.top = '0'; 
-        content.style.width = `${Canvas.PAGE_WIDTH}px`;
-        content.style.height = `${Canvas.PAGE_HEIGHT}px`;
 
         content.appendChild( 
             this.htmlElement 
@@ -125,7 +123,11 @@ abstract class Canvas {
     }
 }
 
-class DrawingCanvas extends Canvas {
+import { DrawingListener } from '../model/drawing';
+
+class DrawingCanvas 
+    extends Canvas
+    implements DrawingListener {            // NEW
 
     static readonly GRID_SIZE: number = 100;
     static readonly GRID_COLOR: string = '#DDD0DD';
@@ -136,6 +138,20 @@ class DrawingCanvas extends Canvas {
 
     init(): void {
         this.htmlElement.style.backgroundColor = '#FAFAFA';
+
+        // NEW
+        App.getInstance()
+            .addListener(
+                this
+            );
+    }
+
+    // NEW
+    onDrawingChange(
+        ev: DrawingEvent ): void {
+        
+        // TODO: not all events require repainting
+        this.repaint();
     }
 
     repaint(): void {
@@ -151,7 +167,9 @@ class DrawingCanvas extends Canvas {
 
     // private methods ------------------------------------------------------
 
-    private clear( ctx: CanvasRenderingContext2D ): void {
+    private clear(
+        ctx: CanvasRenderingContext2D ): void {
+        
         ctx.fillStyle = this.htmlElement.style.backgroundColor;
         ctx.fillRect( 0, 0, this.width, this.height );
     }
@@ -202,13 +220,13 @@ class DrawingCanvas extends Canvas {
     }
 }
 
-import { Tool } from './tool';
 import { SelectionTool } from './selection-tool';
+import { Tool } from './tool';
+import { DrawingEvent } from '../model/drawing';
 import { LineCreationTool } from './line-creation-tool';
 import { RectangleCreationTool } from './rectangle-creation-tool';
 import { EllipseCreationTool } from './ellipse-creation-tool';
-import { HexagonCreationTool } from './hexagon-creation-tool';
-// import { TextCreationTool } from './text-creation-tool';
+import { TextCreationTool } from './text-creation-tool';
 
 // NEW
 export const LINE_CREATION: number = 0;
@@ -216,11 +234,12 @@ export const RECT_CREATION: number = 1;
 export const ELLI_CREATION: number = 2;
 export const TEXT_CREATION: number = 3;
 export const SELECTION:     number = 4;
-export const HEXA_CREATION: number = 5;
 
-class FeedbackCanvas extends Canvas {
+class FeedbackCanvas 
+    extends Canvas {
 
-    private tools: Tool[] = [];
+    private tools: Tool[] = [
+    ];
     private activeTool: Tool;
 
     constructor() {
@@ -231,7 +250,6 @@ class FeedbackCanvas extends Canvas {
 
         this.buildTools();
         
-        // NEW
         this.setActiveTool(
             LINE_CREATION
         );
@@ -256,7 +274,6 @@ class FeedbackCanvas extends Canvas {
                 )
         );
 
-        // NEW
         window.addEventListener( 
             'mousemove', 
             this.handleMouseMove
@@ -265,7 +282,6 @@ class FeedbackCanvas extends Canvas {
                 )
         );
 
-        // NEW
         window.addEventListener( 
             'keyup', 
             this.handleKeyPressed
@@ -276,28 +292,19 @@ class FeedbackCanvas extends Canvas {
     }
 
     setActiveTool( t: number ) {
-        this.activeTool = this.tools[t];
+
         console.log(
             `TOOL => ${t}`
         );
-        // if (Object.keys(this.activeTool).length >= 2){
-        //     this.activeTool = this.tools[t];
-        //     console.log(
-        //         `Entre a este if, el valor de t es: ${t}`
-        //     );
-        // }
+
+        if ( this.activeTool == this.tools[ SELECTION ]
+            && t != SELECTION ) {
+
+            App.getInstance()
+                .deselectAll();        
+        }
         
-        
-        console.log("El valor de activeTool"+this.activeTool);
-        console.log(typeof(this.activeTool));
-        console.log(Object.keys(this.activeTool).length);
-        // for (let i =0; i>1; i++){
-        //     if(this.activeTool[i]){
-            
-        //     }
-        
-        // }
-        
+        this.activeTool = this.tools[ t ];
 
         App.getInstance()
             .setToolTitle(
@@ -315,13 +322,17 @@ class FeedbackCanvas extends Canvas {
             );
     }
 
-    // NEW
     setCursor(
         cursor: string ): void {
 
         this.htmlElement
             .style
             .cursor = cursor;
+    }
+
+    about():void{
+        let newWindow = window.open("", "myWindow", "width=500,height=500");
+        newWindow.document.write("<p>Código desarollado para la materia POO</p>");
     }
 
     // private methods ------------------------------------------------------
@@ -332,9 +343,7 @@ class FeedbackCanvas extends Canvas {
         this.tools[ LINE_CREATION ] = new LineCreationTool();
         this.tools[ RECT_CREATION ] = new RectangleCreationTool();
         this.tools[ ELLI_CREATION ] = new EllipseCreationTool();
-        this.tools[ HEXA_CREATION ] = new HexagonCreationTool();
-        // this.tools[ TEXT_CREATION ] = new TextCreationTool();
-        
+        this.tools[ TEXT_CREATION ] = new TextCreationTool();
         this.tools[ SELECTION ] = new SelectionTool();
     }
 
@@ -367,22 +376,54 @@ class FeedbackCanvas extends Canvas {
             );
     }
 
+    // Close Window 
+    quitWindow():void{
+        console.log("entre a cerrar el la pagina web")
+        window.open('', '_self', '');
+        window.close();
+    }
+
     private handleKeyPressed(
         ke: KeyboardEvent ): void {
 
-        if ( ke.ctrlKey ) {
-            ke.preventDefault();         // do not bubble
-        
-            if ( ke.code === 'KeyL' ) {
-                this.setActiveTool(
-                    LINE_CREATION    
-                );
-            }
-            else if ( ke.code === 'KeyS' ) {
-                this.setActiveTool(
-                    SELECTION    
-                );
-            }
+            if ( ke ) {
+                ke.preventDefault();         // do not bubble
+    
+                console.log("El valor de ke.ctrlKey es: " + ke.ctrlKey);
+    
+                if ( ke.code === 'KeyL' ) {
+                    this.setActiveTool(
+                        LINE_CREATION    
+                    );
+                }
+                
+                else if ( ke.code === 'KeyR' ){
+                    this.setActiveTool(
+                        RECT_CREATION
+                    );
+                }
+    
+                else if ( ke.code === 'KeyE' ) {
+                    this.setActiveTool(
+                        ELLI_CREATION
+                    );
+                }
+
+                else if ( ke.code === 'KeyT' ) {
+                    this.setActiveTool(
+                        TEXT_CREATION
+                    );
+                }
+    
+                else if ( ke.code === 'KeyS' ) {
+                    this.setActiveTool(
+                        SELECTION    
+                    );
+                }
+
+                else if ( ke.code === 'KeyQ' ) {
+                    this.quitWindow();
+                }
         }
     }
 }

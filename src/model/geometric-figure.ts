@@ -18,11 +18,13 @@ export class GeomFigure extends Figure {
             color
         );
     }
-
+    
     // 1. paint lineWidth and lineDashOffset
-    protected doPaint( ctx: CanvasRenderingContext2D ): void {
+    doPaint(
+        ctx: CanvasRenderingContext2D ): void {
         ctx.lineWidth = this.lineThickness;
         ctx.setLineDash(this.lineStyle);
     }
-
+    
+    
 }

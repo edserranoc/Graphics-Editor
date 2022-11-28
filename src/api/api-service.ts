@@ -1,11 +1,11 @@
 import { Factory, Figure } from '../model/figure';
 
-interface JsonFigure {
+export interface JsonFigure {
     clazz: string;
     object: any;
 }
 
-interface FigureDoc {
+export interface FigureDoc {
     figures: JsonFigure[];
 }
 
@@ -48,7 +48,7 @@ export class ApiService {
             }
 
             fetch(
-                ApiService._URL_,   // Uniform Resource Location
+                ApiService._URL_, 
                 options
             )
             .then( (res: Response) => {
@@ -103,7 +103,7 @@ export class ApiService {
             options
         );
 
-        const response: Response = await fetch(
+        const response = await fetch(
             request
         );
 
@@ -212,6 +212,24 @@ export class ApiService {
                 return figures;
             });
     }
+
+    // NEW
+    toJSON(
+        f: Figure ): string {
+
+        return FigureFactory.toJSON(
+            f
+        );
+    }
+
+    // NEW
+    fromJSON(
+        json: JsonFigure ): Figure | undefined {
+
+        return FigureFactory.fromJSON(
+            json
+        );
+    }
 }
 
 class FigureFactory {
@@ -240,10 +258,11 @@ class FigureFactory {
 
     static toJSON(
         f: Figure ): string {
-
+            
         let r: string = `{ "clazz": "${f.name}"`;
-
-        r += `, "object": ${JSON.stringify( f )}`;
+        
+        // NEW
+        r += `, "object": ${f.toJSON()}`;
         r += ' }';
 
         return r;
@@ -286,7 +305,7 @@ class FigureFactory {
             alert(
                 `ERROR => ${json.clazz} CLASS FACTORY NOT REGISTERED!`
             );
-        }
+        } 
     }
 }
 

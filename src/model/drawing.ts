@@ -495,6 +495,8 @@ export class Drawing {
                 (ff: Figure) => f != ff
             );
 
+    
+        
         this.notifyListeners(
             DrawingEvent.FIGURE_REMOVED
         );
@@ -513,6 +515,8 @@ export class Drawing {
                 .flushRedo();
         }
     }
+
+
 
     getControlPoint(
         ev: MouseEvent ): ControlPoint {

@@ -16,7 +16,11 @@ export class EllipseCreationTool extends CreationTool {
         ev: MouseEvent ): void {
 
         ctx.beginPath();
-        ctx.ellipse(
+        ctx.ellipse(this.evDown.offsetX+((ev.offsetX-this.evDown.offsetX)/2), this.evDown.offsetY+((ev.offsetY-this.evDown.offsetY)/2), (ev.offsetX-this.evDown.offsetX)/2, (ev.offsetY-this.evDown.offsetY)/2,0,0,Math.PI*2);
+        ctx.closePath();
+        ctx.stroke();      
+        }
+        /*  ctx.ellipse(
             this.evDown.offsetX, 
             this.evDown.offsetY,
             ev.offsetX - this.evDown.offsetX,
@@ -35,18 +39,36 @@ export class EllipseCreationTool extends CreationTool {
         // );
 
         ctx.stroke();
-    }
+    }*/
+   /* protected createFigure(): Figure {
+        return new Elipse(
+            new BoundBox(
+                { 
+                    x: this.evDown.offsetX, 
+                    y: this.evDown.offsetY 
+                },
+                { 
+                    w: this.evUp.offsetX - this.evDown.offsetX, 
+                    h: this.evUp.offsetY - this.evDown.offsetY
+                }
+            ),
+            { 
+                r: 0, g: 0, b: 0, a: 255   // color ?
+            }
+        );
+    }  
+   */ 
 
     protected createFigure(): Figure {
         return new Ellipse(
             new BoundBox(
                 { 
-                    x: this.evDown.offsetX - (this.evUp.offsetX - this.evDown.offsetX), 
-                    y: this.evDown.offsetY - (this.evUp.offsetY - this.evDown.offsetY)
+                    x: this.evDown.offsetX /*- (this.evUp.offsetX - this.evDown.offsetX)*/, 
+                    y: this.evDown.offsetY/* - (this.evUp.offsetY - this.evDown.offsetY)*/
                 },
                 { 
-                    w: 2*(this.evUp.offsetX - this.evDown.offsetX), 
-                    h: 2*(this.evUp.offsetY - this.evDown.offsetY)
+                    w: this.evUp.offsetX - this.evDown.offsetX, 
+                    h: this.evUp.offsetY - this.evDown.offsetY
                 }
             ),
             { 

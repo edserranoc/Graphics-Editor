@@ -36,7 +36,11 @@ export class Ellipse extends ClosedFigure {
 
         // ctx.lineWidth=this.lineThickness;
         // ctx.setLineDash(this.lineStyle);
-
+        ctx.beginPath();
+        ctx.ellipse(this.bbox.x+this.bbox.w/2, this.bbox.y+this.bbox.h/2, this.bbox.w/2, this.bbox.h/2,0,0,Math.PI*2);
+        ctx.closePath();
+        ctx.stroke();
+/*
         ctx.beginPath();
         ctx.ellipse(
             this.initialPointX,
@@ -47,6 +51,7 @@ export class Ellipse extends ClosedFigure {
             this.startAngle,
             this.endAngle
         );
+    */
 
         if(this.fillColor){
             ctx.fillStyle = ColorHelper.colorAsString(

@@ -42,21 +42,16 @@ export class BoundBox
         ctx.stroke();
     }
 
-    get x(): number {
-        return this.position.x;
-    }
+    get x(): number {return this.position.x; }
+    get y(): number {return this.position.y; }
+    get w(): number {return this.size.w; }
+    get h(): number {return this.size.h; }
 
-    get y(): number {
-        return this.position.y;
-    }
+    get xr(): number {return (()=>{if(this.size.w>0){return this.position.x}else{return this.position.x+this.size.w}})();}
+    get yr(): number {return (()=>{if(this.size.h>0){return this.position.y}else{return this.position.y+this.size.h}})();}
+    get wr(): number {return (()=>{if(this.size.w>0){return this.size.w}else{return -this.size.w}})();}
+    get hr(): number {return (()=>{if(this.size.h>0){return this.size.h}else{return -this.size.h}})();}
 
-    get w(): number {
-        return this.size.w;
-    }
-
-    get h(): number {
-        return this.size.h;
-    }
 
     select(
         evDown: MouseEvent,
@@ -75,13 +70,11 @@ export class BoundBox
         );
     }
 
-    contains(
-        ev: MouseEvent ): boolean {
-
-        const left:   number = this.x - ControlPoint.HSIZE;
-        const right:  number = this.x + this.w + ControlPoint.HSIZE;
-        const top:    number = this.y - ControlPoint.HSIZE;
-        const bottom: number = this.y + this.h + ControlPoint.HSIZE;
+    contains(ev: MouseEvent ): boolean {
+        const left:   number = this.xr - ControlPoint.HSIZE;
+        const right:  number = this.xr + this.wr + ControlPoint.HSIZE;
+        const top:    number = this.yr - ControlPoint.HSIZE;
+        const bottom: number = this.yr + this.hr + ControlPoint.HSIZE;
                 
         return left <= ev.offsetX && ev.offsetX <= right
             && top <= ev.offsetY && ev.offsetY <= bottom;
@@ -132,7 +125,37 @@ export class BoundBox
     // non-public members -----------------------------
     
     // NEW
+
     private contained(
+        evDown: MouseEvent,
+        evUp: MouseEvent ): boolean {
+        
+        let X=evDown.offsetX;
+        let Y=evDown.offsetY;
+        let W=evUp.offsetX - evDown.offsetX;
+        let H=evUp.offsetY - evDown.offsetY;
+
+        const horizontal1: boolean =  ( ()=> {if(H < 0) {
+                                            return this.position.y > Y+H} 
+                                            else {return this.position.y >Y}} )();
+        const horizontal2: boolean =  ( ()=> {if(H < 0) {
+                                            return this.position.y + this.size.h < Y}
+                                            else {return this.position.y + this.size.h < Y+H}} )();
+        const vertical1: boolean =  ( ()=> {if(W < 0) {
+                                            return this.position.x > X+W}
+                                            else {return this.position.x > X}} )();
+        
+        const vertical2: boolean =  ( ()=> {if(W < 0) {
+                                            return this.position.x + this.size.w < X}
+                                            else {return this.position.x + this.size.w < X+W}} )();
+    
+        return vertical1 && vertical2 && horizontal1 && horizontal2;
+    }
+
+}
+
+/*
+private contained(
         evDown: MouseEvent,
         evUp: MouseEvent ): boolean {
 
@@ -145,8 +168,7 @@ export class BoundBox
             bbox
         );
     }
-
-    private intersects(
+private intersects(
         bbox: BoundBox ): boolean {
 
         const x_overlap: number = Math.max(
@@ -159,5 +181,4 @@ export class BoundBox
         );
 
         return (x_overlap * y_overlap > 0);
-    }
-}
+    }*/
